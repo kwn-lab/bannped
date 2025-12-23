@@ -65,7 +65,7 @@
             <div class="header-item">ยอดขาย<b id="h-target">0.00</b></div>
         </div>
         <div class="header-total">
-            <div><span style="font-size: 0.7rem;">ยอดรวมที่มี</span><div class="grand-total-price" id="g-total">0.00</div></div>
+            <div><span style="font-size: 0.7rem;">ยอดรวมทั้งหมด</span><div class="grand-total-price" id="g-total">0.00</div></div>
             <div id="diff-tag" class="diff-tag">รอข้อมูล</div>
         </div>
     </div>
@@ -74,17 +74,17 @@
 <div class="main-layout">
     <div class="card">
         <div class="cash-display">
-            <label>นับเงินสดได้รวม</label>
+            <label>นับเงินสดได้</label>
             <div class="val" id="display-cash-total">0.00</div>
         </div>
 
         <div class="big-input">
-            <label>ยอดเงินสดรวม (Cash)</label>
+            <label>เงินสดรวม (Cash)</label>
             <input type="number" id="manual-cash" placeholder="0.00" oninput="doCalc('manual')" onclick="this.select()">
         </div>
 
         <div class="toggle-container">
-            <button class="btn-toggle" id="t-btn" onclick="toggleDetails()">🔽 เปิดตารางนับแยกใบ/เหรียญ</button>
+            <button class="btn-toggle" id="t-btn" onclick="toggleDetails()">🔽 เปิดตารางนับเงินสด</button>
         </div>
 
         <div id="detail-section">
