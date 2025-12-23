@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>นับเงินครัวบ้านเป็ด</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #2d3436; --accent: #f39c12; --success: #2ecc71; --danger: #e74c3c; --bg: #f0f2f5; }
+        * { box-sizing: border-box; font-family: 'Kanit', sans-serif; }
+        body { background-color: var(--bg); margin: 0; padding: 10px; padding-bottom: 120px; } /* เผื่อที่ให้แถบสรุปด้านล่าง */
+
+        .container { max-width: 500px; margin: 0 auto; }
+        h2 { text-align: center; color: var(--primary); margin: 15px 0; font-size: 1.5rem; }
+
+        .card { background: white; border-radius: 16px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        .section-title { font-size: 1rem; font-weight: 600; color: #636e72; margin-bottom: 12px; display: flex; align-items: center; }
+        .section-title::before { content: "🦆"; margin-right: 8px; }
+
+        /* แถวกรอกเงินสด */
+        .money-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+        .money-row { display: flex; align-items: center; background: #f8f9fa; padding: 12px; border-radius: 12px; border: 1px solid #edf2f7; }
+        .label { width: 100px; font-weight: 500; font-size: 1.1rem; }
+        .input-wrapper { flex: 1; position: relative; }
+        .input-wrapper input { width: 100%; border: 2px solid #ddd; border-radius: 8px; padding: 10px; text-align: right; font-size: 1.2rem; appearance: none; -webkit-appearance: none; }
+        .input-wrapper input:focus { border-color: var(--accent); outline: none; background: #fffdfa; }
+        .row-result { width: 100px; text-align: right; font-weight: bold; color: var(--success); font-size: 0.9rem; margin-left: 10px; }
+
+        /* ช่องยอดโอนและยอดขาย */
+        .big-input-group { margin-bottom: 15px; }
+        .big-input-group label { display: block; margin-bottom: 6px; font-size: 0.9rem; font-weight: bold; color: #444; }
+        .big-input-group input { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #cbd5e1; font-size: 1.4rem; text-align: right; font-weight: bold; color: var(--primary); }
+        .bank-input input { border-color: #3498db; background: #ebf5ff; }
+        .target-input input { border-color: #94a3b8; background: #f8fafc; }
+
+        /* แถบสรุปยอดด้านล่าง (Sticky Footer) */
+        .footer-summary { position: fixed; bottom: 0; left: 0; right: 0; background: var(--primary); color: white; padding: 15px 20px; border-radius: 20px 20px 0 0; box-shadow: 0 -5px 15px rgba(0,0,0,0.2); z-index: 1000; }
+        .footer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px; }
+        .footer-item { font-size: 0.85rem; opacity: 0.8; }
+        .footer-item b { display: block; font-size: 1.1rem; opacity: 1; }
+        .footer-total { grid-column: span 2; border-top: 1px solid #444; padding-top: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .grand-total-price { font-size: 1.6rem; font-weight: bold; color: var(--accent); }
+
+        .diff-tag { font-size: 0.9rem; padding: 4px 12px; border-radius: 20px; font-weight: bold; }
+        .diff-none { background: #444; color: #ccc; }
+        .diff-plus { background: var(--success); color: white; }
+        .diff-minus { background: var(--danger); color: white; }
+
+        button.reset-btn { width: 100%; background: #dfe6e9; border: none; padding: 12px; border-radius: 10px; color: #636e72; font-weight: bold; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>นับเงินครัวบ้านเป็ด</h2>
+
+    <div class="card target-input big-input-group">
+        <label>ยอดขายทั้งหมด (Target)</label>
+        <input type="number" id="target-amount" placeholder="0.00" oninput="calculate()" onclick="this.select()">
+    </div>
+
+    <div class="card bank-input big-input-group">
+        <label>เงินโอนในบัญชี (Bank)</label>
+        <input type="number" id="bank-amount" placeholder="0.00" oninput="calculate()" onclick="this.select()">
+    </div>
+
+    <div class="card">
+        <div class="section-title">นับเงินสดในเครื่อง</div>
+        <div class="money-grid">
+            <div class="money-row"><span class="label">1,000</span><div class="input-wrapper"><input type="number" class="qty" data-value="1000" oninput="calculate()" onclick="this.select()" placeholder="0"></div><div class="row-result">0</div></div>
+            <div class="money-row"><span class="label">500</span><div class="input-wrapper"><input type="number" class="qty" data-value="500" oninput="calculate()" onclick="this.select()" placeholder="0"></div><div class="row-result">0</div></div>
+            <div class="money-row"><span class="label">100</span><div class="input-wrapper"><input type="number" class="qty" data-value="100" oninput="calculate()" onclick="this.select()" placeholder="0"></div><div class="row-result">0</div></div>
+            <div class="money-row"><span class="label">50</span><div class="input-wrapper"><input type="number" class="qty" data-value="50" oninput="calculate()" onclick="this.select()" placeholder="0"></div><div class="row-result">0</div></div>
+            <div class="money-row"><span class="label">20</span><div class="input-wrapper"><input type="number" class="qty" data-value="20" oninput="calculate()" onclick="this.select()" placeholder="0"></div><div class="row-result">0</div></div>
+            <div class="money-row"><span class="label">10</span><div class="input-wrapper"><input type="number" class="qty" data-value="10" oninput="calculate()" onclick="this.select()" placeholder="0"></div><div class="row-result">0</div></div>
+            <div class="money-row"><span class="label">5</span><div class="input-wrapper"><input type="number" class="qty" data-value="5" oninput="calculate()" onclick="this.select()" placeholder="0"></div><div class="row-result">0</div></div>
+            <div class="money-row"><span class="label">1 / เศษ</span><div class="input-wrapper"><input type="number" class="qty" data-value="1" oninput="calculate()" onclick="this.select()" placeholder="0"></div><div class="row-result">0</div></div>
+        </div>
+        <button class="reset-btn" onclick="resetAll()">ล้างข้อมูลใหม่</button>
+    </div>
+</div>
+
+<div class="footer-summary">
+    <div class="footer-grid">
+        <div class="footer-item">เงินสด: <b id="sum-cash">0.00</b></div>
+        <div class="footer-item">ในบัญชี: <b id="sum-bank">0.00</b></div>
+    </div>
+    <div class="footer-total">
+        <div>
+            <span style="font-size: 0.8rem; opacity: 0.8;">รวมทั้งสิ้น</span>
+            <div class="grand-total-price" id="grand-total">0.00</div>
+        </div>
+        <div id="diff-status" class="diff-tag diff-none">ใส่ยอดขาย</div>
+    </div>
+</div>
+
+<script>
+    function calculate() {
+        let cashTotal = 0;
+        const rows = document.querySelectorAll('.money-row');
+        
+        rows.forEach(row => {
+            const input = row.querySelector('.qty');
+            const resDisp = row.querySelector('.row-result');
+            const val = parseFloat(input.getAttribute('data-value'));
+            const qty = parseFloat(input.value) || 0;
+            const sub = val * qty;
+            resDisp.textContent = sub.toLocaleString();
+            cashTotal += sub;
+        });
+
+        const bankTotal = parseFloat(document.getElementById('bank-amount').value) || 0;
+        const targetTotal = parseFloat(document.getElementById('target-amount').value) || 0;
+        const grandTotal = cashTotal + bankTotal;
+        const diff = grandTotal - targetTotal;
+
+        // อัปเดตตัวเลข
+        document.getElementById('sum-cash').textContent = cashTotal.toLocaleString(undefined, {minimumFractionDigits: 2});
+        document.getElementById('sum-bank').textContent = bankTotal.toLocaleString(undefined, {minimumFractionDigits: 2});
+        document.getElementById('grand-total').textContent = grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2});
+
+        // อัปเดต Tag ส่วนต่าง
+        const diffStatus = document.getElementById('diff-status');
+        if (targetTotal <= 0) {
+            diffStatus.className = 'diff-tag diff-none';
+            diffStatus.textContent = 'รอเป้าหมาย';
+        } else {
+            if (diff === 0) {
+                diffStatus.className = 'diff-tag diff-plus';
+                diffStatus.textContent = '✅ ตรงพอดี';
+            } else if (diff > 0) {
+                diffStatus.className = 'diff-tag diff-plus';
+                diffStatus.textContent = 'เกิน +' + diff.toLocaleString();
+            } else {
+                diffStatus.className = 'diff-tag diff-minus';
+                diffStatus.textContent = 'ขาด ' + diff.toLocaleString();
+            }
+        }
+    }
+
+    function resetAll() {
+        if(confirm('ต้องการเริ่มใหม่หรือไม่?')) {
+            document.querySelectorAll('input').forEach(i => i.value = '');
+            calculate();
+            window.scrollTo(0,0);
+        }
+    }
+</script>
+
+</body>
+</html>
